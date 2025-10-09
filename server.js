@@ -9,6 +9,7 @@ import indexRouter from './src/routes/index.js';
 import dotenv from 'dotenv';
 import { connectToMongoDB } from './src/config/connectMongoDb.js'; 
 import { errorMiddleWare } from './src/middleware/error.middleware.js';
+import { specs, swaggerUi } from './src/config/swagger.js';
 dotenv.config();
 
 const app = express();
@@ -25,6 +26,25 @@ app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
 // Health check route
+/**
+ * @swagger
+ * /health:
+ *   get:
+ *     summary: Health check endpoint
+ *     description: Returns the current status and uptime of the server
+ *     tags: [System]
+ *     responses:
+ *       200:
+ *         description: Server is healthy
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/HealthResponse'
+ *             example:
+ *               status: "OK"
+ *               uptime: 1234.567
+ *               timestamp: "2023-12-01T10:30:00.000Z"
+ */
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'OK',
@@ -32,6 +52,13 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+
+// Swagger documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
+  explorer: true,
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'PP Backend API Documentation'
+}));
 
 // Routes
 app.use('/', indexRouter);
@@ -44,6 +71,7 @@ app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
   console.log(`📍 Local: http://localhost:${PORT}`);
   console.log(`🔗 Health check: http://localhost:${PORT}/health`);
+  console.log(`📚 API Documentation: http://localhost:${PORT}/api-docs`);
 });
 
 export default app;
