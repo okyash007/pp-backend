@@ -53,6 +53,12 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Serve the raw JSON spec first (before the catch-all /api-docs route)
+app.get('/api-docs/swagger.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(specs);
+});
+
 // Swagger documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
   explorer: true,
