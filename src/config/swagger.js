@@ -15,9 +15,15 @@ const options = {
     },
     servers: [
       {
+        url: process.env.NODE_ENV === 'production' 
+          ? (process.env.API_BASE_URL || 'https://pp-backend.apextip.space/')
+          : 'http://localhost:8000',
+        description: process.env.NODE_ENV === 'production' ? 'Production server' : 'Development server'
+      },
+      ...(process.env.NODE_ENV !== 'production' ? [{
         url: 'http://localhost:8000',
         description: 'Development server'
-      }
+      }] : [])
     ],
     components: {
       securitySchemes: {

@@ -57,7 +57,16 @@ app.get('/health', (req, res) => {
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
   explorer: true,
   customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'PP Backend API Documentation'
+  customSiteTitle: 'PP Backend API Documentation',
+  swaggerOptions: {
+    persistAuthorization: true,
+    displayRequestDuration: true,
+    docExpansion: 'none',
+    filter: true,
+    showExtensions: true,
+    showCommonExtensions: true,
+    tryItOutEnabled: true
+  }
 }));
 
 // Routes
@@ -68,10 +77,15 @@ app.use(errorMiddleWare);
 
 // Start server
 app.listen(PORT, () => {
+  const baseUrl = process.env.NODE_ENV === 'production' 
+    ? (process.env.API_BASE_URL || `http://localhost:${PORT}`)
+    : `http://localhost:${PORT}`;
+    
   console.log(`🚀 Server is running on port ${PORT}`);
-  console.log(`📍 Local: http://localhost:${PORT}`);
-  console.log(`🔗 Health check: http://localhost:${PORT}/health`);
-  console.log(`📚 API Documentation: http://localhost:${PORT}/api-docs`);
+  console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔗 Base URL: ${baseUrl}`);
+  console.log(`🔗 Health check: ${baseUrl}/health`);
+  console.log(`📚 API Documentation: ${baseUrl}/api-docs`);
 });
 
 export default app;
