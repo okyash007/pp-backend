@@ -1,5 +1,10 @@
-import { getConfigById, updateConfigById } from "../services/config.service.js";
+import { createConfig, getConfigById, updateConfigById } from "../services/config.service.js";
 import { ApiResponse } from "../utils/response.api.js";
+
+export const createConfigController = async (req, res) => {
+  const config = await createConfig(req.body);
+  res.json(new ApiResponse(201, config));
+};
 
 export const getConfigController = async (req, res) => {
   const { id } = req.params;

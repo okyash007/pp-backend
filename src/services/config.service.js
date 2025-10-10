@@ -1,5 +1,11 @@
 import Config from "../models/config.js";
 
+export const createConfig = async (data) => {
+  const config = new Config(data);
+  await config.save();
+  return config;
+};
+
 export const getConfigById = async (id) => {
   const config = await Config.findById(id);
   return config;
