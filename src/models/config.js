@@ -33,6 +33,14 @@ const configSchema = new mongoose.Schema(
       },
     },
     overlay: {
+      id: {
+        type: String,
+        default: "overlay-1",
+      },
+      name: {
+        type: String,
+        default: "Overlay 1",
+      },
       className: {
         type: String,
         default: "animate-in slide-in-from-right-5 duration-500",
