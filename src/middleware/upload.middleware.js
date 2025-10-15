@@ -1,11 +1,18 @@
 import multer from 'multer';
 import path from 'path';
+import fs from 'fs';
 import ApiError from '../utils/error.api.js';
+
+// Ensure uploads directory exists
+const uploadsDir = 'uploads/';
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
 // Configure multer storage (memory or disk)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Temporary storage before Cloudinary
+    cb(null, uploadsDir); // Temporary storage before Cloudinary
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -15,14 +22,14 @@ const storage = multer.diskStorage({
 
 // File filter - accept only images
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = /jpeg|jpg|png|gif|webp/;
+  const allowedTypes = /jpeg|jpg|png|gif|webp|svg/;
   const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
   const mimetype = allowedTypes.test(file.mimetype);
 
   if (mimetype && extname) {
     return cb(null, true);
   } else {
-    cb(new ApiError(400, 'Only image files are allowed (jpeg, jpg, png, gif, webp)'));
+    cb(new ApiError(400, 'Only image files are allowed (jpeg, jpg, png, gif, webp, svg)'));
   }
 };
 
