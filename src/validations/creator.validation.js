@@ -1,5 +1,28 @@
 import { z } from "zod";
 
+// Social platform enum
+const socialPlatforms = [
+  "instagram",
+  "facebook", 
+  "youtube",
+  "twitch",
+  "twitter",
+  "tiktok",
+  "kick",
+  "rumble",
+  "linkedin",
+  "github",
+  "website",
+];
+
+// Social link validation schema
+const socialSchema = z.object({
+  platform: z.enum(socialPlatforms, {
+    errorMap: () => ({ message: "Invalid social platform" }),
+  }),
+  url: z.string().url("Please provide a valid URL").optional(),
+});
+
 // Signup validation schema
 export const signupSchema = z.object({
   username: z
@@ -38,6 +61,10 @@ export const signupSchema = z.object({
     .regex(/^\+?[\d\s\-\(\)]+$/, "Please provide a valid phone number")
     .optional()
     .or(z.literal("")),
+  socials: z.array(socialSchema).optional(),
+  verificationCode: z
+    .string()
+    .min(1, "Verification code is required"),
 });
 
 // Login validation schema
@@ -76,16 +103,56 @@ export const updateProfileSchema = z.object({
     .regex(/^\+?[\d\s\-\(\)]+$/, "Please provide a valid phone number")
     .optional()
     .or(z.literal("")),
+  socials: z.array(socialSchema).optional(),
   image: z
     .object({
-      src: z.string().url("Image source must be a valid URL").optional(),
+      src: z.string().optional(),
     })
     .optional(),
   banner_image: z
     .object({
-      src: z.string().url("Banner image source must be a valid URL").optional(),
+      src: z.string().optional(),
     })
     .optional(),
+  approved: z.boolean().optional(),
+});
+
+// Verification code validation schema
+export const verifyCodeSchema = z.object({
+  verificationCode: z
+    .string()
+    .min(1, "Verification code is required"),
+  email: z
+    .string()
+    .email("Please provide a valid email address"),
+});
+
+// Creator ID validation schema (for admin operations)
+export const creatorIdSchema = z.object({
+  creator_id: z
+    .string()
+    .min(1, "Creator ID is required")
+    .max(8, "Creator ID must be 8 characters or less"),
+});
+
+// Social links update schema
+export const updateSocialsSchema = z.object({
+  socials: z.array(socialSchema).optional(),
+});
+
+// Password update schema
+export const updatePasswordSchema = z.object({
+  currentPassword: z
+    .string()
+    .min(1, "Current password is required"),
+  newPassword: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .max(100, "Password must be less than 100 characters")
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      "Password must contain at least one uppercase letter, one lowercase letter, and one number"
+    ),
 });
 
 // Validation middleware factory
