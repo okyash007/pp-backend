@@ -13,7 +13,10 @@ const creatorSchema = new mongoose.Schema(
       unique: [true, "Username already exists"],
       minlength: [3, "Username must be at least 3 characters"],
       maxlength: [30, "Username must be less than 30 characters"],
-      match: [/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"],
+      match: [
+        /^[a-zA-Z0-9_]+$/,
+        "Username can only contain letters, numbers, and underscores",
+      ],
       trim: true,
     },
     firstName: {
@@ -29,19 +32,31 @@ const creatorSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
-    phone: {
-      type: String,
-    },
-    approved: { type: Boolean, default: false },
     password: {
       type: String,
       required: [true, "Password is required"],
       minlength: [8, "Password must be at least 8 characters"],
     },
+    phone: {
+      type: String,
+    },
     verificationCode: {
       type: String,
-      required: [true, "Verification code is required"],
     },
+    approved: {
+      type: Boolean,
+      default: false,
+    },
+    socials: [
+      {
+        platform: {
+          type: String,
+        },
+        url: {
+          type: String,
+        },
+      },
+    ],
     config: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "configs",
@@ -61,7 +76,7 @@ const creatorSchema = new mongoose.Schema(
 );
 
 // Pre-save middleware to automatically generate short creator_id using UUID
-creatorSchema.pre('save', function(next) {
+creatorSchema.pre("save", function (next) {
   if (!this.creator_id) {
     // Generate UUID and take first 8 characters for shorter creator_id
     this.creator_id = uuidv4().substring(0, 8);
@@ -70,25 +85,25 @@ creatorSchema.pre('save', function(next) {
 });
 
 // Custom error handler for duplicate key errors
-creatorSchema.post('save', function(error, doc, next) {
-  if (error.name === 'MongoServerError' && error.code === 11000) {
+creatorSchema.post("save", function (error, doc, next) {
+  if (error.name === "MongoServerError" && error.code === 11000) {
     const field = Object.keys(error.keyPattern)[0];
-    let message = '';
-    
+    let message = "";
+
     switch (field) {
-      case 'email':
-        message = 'Email already exists';
+      case "email":
+        message = "Email already exists";
         break;
-      case 'username':
-        message = 'Username already exists';
+      case "username":
+        message = "Username already exists";
         break;
-      case 'creator_id':
-        message = 'Creator ID already exists';
+      case "creator_id":
+        message = "Creator ID already exists";
         break;
       default:
         message = `${field} already exists`;
     }
-    
+
     const customError = new Error(message);
     customError.statusCode = 400;
     customError.isOperational = true;

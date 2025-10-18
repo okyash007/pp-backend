@@ -78,6 +78,7 @@ export const signupCreator = catchAsync(async (req, res) => {
     lastName: savedCreator.lastName,
     email: savedCreator.email,
     phone: savedCreator.phone,
+    socials: savedCreator.socials,
     approved: savedCreator.approved,
     config: savedCreator.config,
     image: savedCreator.image,
@@ -103,6 +104,9 @@ export const signupCreator = catchAsync(async (req, res) => {
 export const loginCreator = catchAsync(async (req, res) => {
   const { emailOrUsername, password } = req.body;
 
+
+  console.log(emailOrUsername, password);
+
   // Find creator by email or username and populate config
   const creator = await Creator.findOne({
     $or: [
@@ -114,6 +118,10 @@ export const loginCreator = catchAsync(async (req, res) => {
   if (!creator) {
     throw new ApiError(401, "Invalid email/username or password");
   }
+
+  console.log(creator);
+  console.log("Password from request:", password);
+  console.log("Password from database:", creator.password);
 
   // Check password
   const isPasswordValid = await bcrypt.compare(password, creator.password);
@@ -133,6 +141,7 @@ export const loginCreator = catchAsync(async (req, res) => {
     lastName: creator.lastName,
     email: creator.email,
     phone: creator.phone,
+    socials: creator.socials,
     approved: creator.approved,
     config: creator.config,
     image: creator.image,
@@ -170,6 +179,7 @@ export const getCreatorProfile = catchAsync(async (req, res) => {
     lastName: creator.lastName,
     email: creator.email,
     phone: creator.phone,
+    socials: creator.socials,
     approved: creator.approved,
     config: creator.config,
     image: creator.image,
@@ -204,6 +214,8 @@ export const updateCreatorProfile = catchAsync(async (req, res) => {
   delete updateData.config;
   delete updateData.creator_id; // creator_id should not be updated
 
+  console.log(updateData);
+
   const creator = await Creator.findByIdAndUpdate(
     creatorId,
     updateData,
@@ -222,6 +234,7 @@ export const updateCreatorProfile = catchAsync(async (req, res) => {
     lastName: creator.lastName,
     email: creator.email,
     phone: creator.phone,
+    socials: creator.socials,
     approved: creator.approved,
     config: creator.config,
     image: creator.image,
