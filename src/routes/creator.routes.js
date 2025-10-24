@@ -4,6 +4,7 @@ import {
   loginCreator,
   getCreatorProfile,
   updateCreatorProfile,
+  verifyCreator,
 } from "../controllers/creator.controllers.js";
 import { authenticateToken } from "../middleware/auth.js";
 import { validate, signupSchema, loginSchema, updateProfileSchema } from "../validations/creator.validation.js";
@@ -213,5 +214,7 @@ router.get("/profile", authenticateToken, getCreatorProfile);
  *         description: Internal server error
  */
 router.put("/profile", authenticateToken, validate(updateProfileSchema), updateCreatorProfile);
+
+router.get("/verify/:id", verifyCreator);
 
 export default router;

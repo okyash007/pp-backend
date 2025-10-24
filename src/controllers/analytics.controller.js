@@ -4,9 +4,11 @@ import { pool } from "../utils/postgress.js";
 import { ApiResponse } from "../utils/response.api.js";
 
 export const getAnalyticsController = catchAsync(async (req, res) => {
-  const { start_date, end_date, creator_id, username } = req.query;
+  const { creator_id, username } = req.creator;
 
-  if (!start_date || !end_date || !creator_id || !username) {
+  const { start_date, end_date } = req.query;
+
+  if (!start_date || !end_date) {
     throw new ApiError(
       400,
       "Start date and end date and creator_id and username are required "

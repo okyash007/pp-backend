@@ -43,6 +43,10 @@ const creatorSchema = new mongoose.Schema(
     verificationCode: {
       type: String,
     },
+    verified: {
+      type: Boolean,
+      default: false,
+    },
     approved: {
       type: Boolean,
       default: false,
@@ -57,10 +61,6 @@ const creatorSchema = new mongoose.Schema(
         },
       },
     ],
-    config: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "configs",
-    },
     image: {
       src: {
         type: String,
@@ -70,6 +70,18 @@ const creatorSchema = new mongoose.Schema(
       src: {
         type: String,
       },
+    },
+    onboarding: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "onboardings",
+    },
+    role: {
+      type: String,
+      enum: ["admin", "creator"],
+      default: "creator",
+    },
+    razorpay_account_id: {
+      type: String,
     },
   },
   { timestamps: true }

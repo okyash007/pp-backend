@@ -62,9 +62,6 @@ export const signupSchema = z.object({
     .optional()
     .or(z.literal("")),
   socials: z.array(socialSchema).optional(),
-  verificationCode: z
-    .string()
-    .min(1, "Verification code is required"),
 });
 
 // Login validation schema
@@ -115,6 +112,9 @@ export const updateProfileSchema = z.object({
     })
     .optional(),
   approved: z.boolean().optional(),
+  verified: z.boolean().optional(),
+  role: z.enum(["admin", "creator"]).optional(),
+  onboarding: z.string().optional(),
 });
 
 // Verification code validation schema
