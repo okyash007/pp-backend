@@ -4,9 +4,16 @@ import {
   loginCreator,
   getCreatorProfile,
   updateCreatorProfile,
+  verifyCreator,
+  getAllCreatorsController,
 } from "../controllers/creator.controllers.js";
 import { authenticateToken } from "../middleware/auth.js";
-import { validate, signupSchema, loginSchema, updateProfileSchema } from "../validations/creator.validation.js";
+import {
+  validate,
+  signupSchema,
+  loginSchema,
+  updateProfileSchema,
+} from "../validations/creator.validation.js";
 
 const router = express.Router();
 
@@ -212,6 +219,15 @@ router.get("/profile", authenticateToken, getCreatorProfile);
  *       500:
  *         description: Internal server error
  */
-router.put("/profile", authenticateToken, validate(updateProfileSchema), updateCreatorProfile);
+router.put(
+  "/profile",
+  authenticateToken,
+  validate(updateProfileSchema),
+  updateCreatorProfile
+);
+
+router.get("/verify/:id", verifyCreator);
+
+router.get("/all", getAllCreatorsController);
 
 export default router;

@@ -4,12 +4,8 @@ import ApiError from "../utils/error.api.js";
 import { ApiResponse } from "../utils/response.api.js";
 
 export const getTipsController = catchAsync(async (req, res) => {
-  const { creator_id } = req.params;
+  const { creator_id } = req.creator;
   const { start_date, end_date, page = 1, limit = 100 } = req.query;
-
-  if (!creator_id) {
-    throw new ApiError(400, "Creator ID is required");
-  }
 
   // Validate pagination parameters
   const pageNum = parseInt(page);

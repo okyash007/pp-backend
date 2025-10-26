@@ -161,8 +161,23 @@ const options = {
               default: false,
               example: false
             },
-            config: {
-              $ref: '#/components/schemas/Config'
+            verified: {
+              type: 'boolean',
+              description: 'Creator verification status',
+              default: false,
+              example: false
+            },
+            role: {
+              type: 'string',
+              description: 'Creator role',
+              enum: ['admin', 'creator'],
+              default: 'creator',
+              example: 'creator'
+            },
+            onboarding: {
+              $ref: '#/components/schemas/MongoDBObjectId',
+              description: 'Reference to onboarding document',
+              example: '507f1f77bcf86cd799439011'
             },
             image: {
               $ref: '#/components/schemas/ImageObject'
@@ -365,6 +380,180 @@ const options = {
               type: 'string',
               format: 'date-time',
               description: 'Current timestamp'
+            }
+          }
+        },
+        Block: {
+          type: 'object',
+          properties: {
+            type: {
+              type: 'string',
+              description: 'Type of the block',
+              enum: ['creator_card', 'socails', 'tips', 'user_form', 'razorpay'],
+              example: 'creator_card'
+            },
+            className: {
+              type: 'string',
+              description: 'CSS classes for the block',
+              example: 'flex flex-col items-center gap-4 overflow-y-auto p-6'
+            },
+            template: {
+              type: 'string',
+              description: 'Liquid template for rendering the block',
+              example: '<div class="border-2 border-black rounded-xl...">'
+            },
+            tip_btn: {
+              type: 'object',
+              description: 'Configuration for tip button (tips block only)',
+              properties: {
+                className: {
+                  type: 'string',
+                  description: 'CSS classes for tip button'
+                },
+                template: {
+                  type: 'string',
+                  description: 'Template for tip button'
+                }
+              }
+            },
+            tip_card: {
+              type: 'object',
+              description: 'Configuration for tip card (tips block only)',
+              properties: {
+                className: {
+                  type: 'string',
+                  description: 'CSS classes for tip card'
+                },
+                template: {
+                  type: 'string',
+                  description: 'Template for tip card'
+                }
+              }
+            },
+            input: {
+              type: 'object',
+              description: 'Configuration for input styling (user_form block only)',
+              properties: {
+                className: {
+                  type: 'string',
+                  description: 'CSS classes for input elements'
+                }
+              }
+            },
+            button: {
+              type: 'object',
+              description: 'Configuration for button styling (razorpay block only)',
+              properties: {
+                className: {
+                  type: 'string',
+                  description: 'CSS classes for button'
+                }
+              }
+            }
+          }
+        },
+        TipPage: {
+          type: 'object',
+          properties: {
+            _id: {
+              $ref: '#/components/schemas/MongoDBObjectId'
+            },
+            creator: {
+              $ref: '#/components/schemas/MongoDBObjectId',
+              description: 'Reference to creator document'
+            },
+            blocks: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/Block'
+              },
+              description: 'Array of blocks that make up the tip page'
+            }
+          },
+          allOf: [
+            { $ref: '#/components/schemas/Timestamps' }
+          ]
+        },
+        UpdateTipPageRequest: {
+          type: 'object',
+          required: ['blocks'],
+          properties: {
+            blocks: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/Block'
+              },
+              description: 'Array of blocks to update the tip page with'
+            }
+          }
+        },
+        Overlay: {
+          type: 'object',
+          properties: {
+            _id: {
+              $ref: '#/components/schemas/MongoDBObjectId'
+            },
+            creator: {
+              $ref: '#/components/schemas/MongoDBObjectId',
+              description: 'Reference to creator document'
+            },
+            blocks: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/Block'
+              },
+              description: 'Array of blocks that make up the overlay'
+            }
+          },
+          allOf: [
+            { $ref: '#/components/schemas/Timestamps' }
+          ]
+        },
+        UpdateOverlayRequest: {
+          type: 'object',
+          required: ['blocks'],
+          properties: {
+            blocks: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/Block'
+              },
+              description: 'Array of blocks to update the overlay with'
+            }
+          }
+        },
+        LinkTree: {
+          type: 'object',
+          properties: {
+            _id: {
+              $ref: '#/components/schemas/MongoDBObjectId'
+            },
+            creator: {
+              $ref: '#/components/schemas/MongoDBObjectId',
+              description: 'Reference to creator document'
+            },
+            blocks: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/Block'
+              },
+              description: 'Array of blocks that make up the link tree'
+            }
+          },
+          allOf: [
+            { $ref: '#/components/schemas/Timestamps' }
+          ]
+        },
+        UpdateLinkTreeRequest: {
+          type: 'object',
+          required: ['blocks'],
+          properties: {
+            blocks: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/Block'
+              },
+              description: 'Array of blocks to update the link tree with'
             }
           }
         }

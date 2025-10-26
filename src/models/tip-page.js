@@ -1,114 +1,10 @@
 import mongoose from "mongoose";
 
-const configSchema = new mongoose.Schema(
+const tipPageSchema = new mongoose.Schema(
   {
-    colors: {
-      primary: {
-        type: String,
-        default: "#3734eb",
-      },
-      secondary: {
-        type: String,
-        default: "#10b981",
-      },
-      accent: {
-        type: String,
-        default: "#8b5cf6",
-      },
-      muted: {
-        type: String,
-        default: "#f9fafb",
-      },
-      warning: {
-        type: String,
-        default: "#f59e0b",
-      },
-      success: {
-        type: String,
-        default: "#10b981",
-      },
-      error: {
-        type: String,
-        default: "#ef4444",
-      },
-    },
-    overlay: {
-      id: {
-        type: String,
-        default: "overlay-1",
-      },
-      name: {
-        type: String,
-        default: "Overlay 1",
-      },
-      className: {
-        type: String,
-        default: "animate-in slide-in-from-right-5 duration-500",
-      },
-      display_time: {
-        type: Number,
-        default: 10000,
-      },
-      template: {
-        type: String,
-        default: `
-          <div class='relative bg-white rounded-lg p-6 border-2 border-black shadow-sm'>
-            <!-- Header with tip icon -->
-            <div class='flex items-center justify-between mb-4'>
-              <div class='flex items-center space-x-3'>
-                <div class='w-10 h-10 bg-pink-200 rounded-lg flex items-center justify-center border-2 border-black'>
-                  <svg class='w-5 h-5 text-black' fill='currentColor' viewBox='0 0 20 20'>
-                    <path d='M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z'/>
-                  </svg>
-                </div>
-                <div>
-                  <div class='text-lg font-semibold text-black'>New Tip!</div>
-                  <div class='text-sm text-gray-600'>{{ visitor_name }}</div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Amount display -->
-            <div class='text-center mb-4'>
-              <div class='text-4xl font-bold text-black mb-2'>
-                {{ amount | divided_by: 100 | round: 2 }} {{ currency }}
-              </div>
-              <div class='text-sm text-gray-600'>Thank you for your support!</div>
-            </div>
-            
-            <!-- Message if available -->
-            {% if message and message != '' %}
-            <div class='bg-purple-100 rounded-lg p-4 mb-4 border-2 border-black'>
-              <div class='flex items-start space-x-2'>
-                <div class='w-6 h-6 bg-purple-200 rounded flex items-center justify-center border border-black flex-shrink-0 mt-0.5'>
-                  <svg class='w-3 h-3 text-black' fill='currentColor' viewBox='0 0 20 20'>
-                    <path fill-rule='evenodd' d='M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z' clip-rule='evenodd'/>
-                  </svg>
-                </div>
-                <p class='text-sm text-black italic'>"{{ message }}"</p>
-              </div>
-            </div>
-            {% endif %}
-            
-            <!-- Footer with payment info -->
-            <div class='flex items-center justify-between text-xs text-gray-600 pt-3 border-t-2 border-gray-200'>
-              <div class='flex items-center space-x-2'>
-                <div class='w-4 h-4 bg-orange-200 rounded border border-black flex items-center justify-center'>
-                  <svg class='w-2 h-2 text-black' fill='currentColor' viewBox='0 0 20 20'>
-                    <path d='M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z'/>
-                  </svg>
-                </div>
-                <span>{{ payment_gateway }}</span>
-              </div>
-              <span class='text-xs'>{{ payment_id }}</span>
-            </div>
-          </div>
-        `,
-      },
-      data: {
-        type: mongoose.Schema.Types.Mixed,
-        default: {},
-      },
+    creator: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "creators",
     },
     blocks: {
       type: [mongoose.Schema.Types.Mixed],
@@ -284,6 +180,6 @@ const configSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Config = mongoose.model("configs", configSchema);
+const TipPage = mongoose.model("tip-pages", tipPageSchema);
 
-export default Config;
+export default TipPage;
