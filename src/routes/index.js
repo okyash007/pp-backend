@@ -6,6 +6,7 @@ import uploadRoutes from './upload.routes.js';
 import linkTreeRoutes from './linkTree.routes.js';
 import tipPageRoutes from './tip-page.routes.js';
 import overlayRoutes from './overlay.routes.js';
+import onboardingRoutes from './onboarding.routes.js';
 
 const router = express.Router();
 
@@ -16,5 +17,6 @@ router.use('/upload', uploadRoutes);
 router.use('/link-tree', linkTreeRoutes);
 router.use('/tip-page', tipPageRoutes);
 router.use('/overlay', overlayRoutes);
+router.use('/onboarding', onboardingRoutes);
 
 export default router;

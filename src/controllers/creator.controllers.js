@@ -376,3 +376,15 @@ export const verifyCreator = catchAsync(async (req, res) => {
     await session.endSession();
   }
 });
+
+export const getAllCreatorsController = catchAsync(async (req, res) => {
+  const creators = await Creator.find()
+    .select("-password -verificationCode -createdAt -updatedAt")
+    .populate("onboarding");
+  const response = new ApiResponse(
+    200,
+    creators,
+    "Creators fetched successfully"
+  );
+  res.status(200).json(response);
+});

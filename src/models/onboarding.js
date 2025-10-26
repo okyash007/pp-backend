@@ -10,50 +10,42 @@ const onboardingSchema = new mongoose.Schema(
       type: Number,
       default: 1,
     },
-    identity_proof: {
+    identity: {
       type: {
         type: String,
-        enum: ["passport", "driver's license", "national identity card"],
-        required: false,
+        enum: ["individual", "organisation"],
       },
-      document_id: {
+      legal_name: {
         type: String,
-        required: false,
       },
-      issuing_country: {
+      pan_number: {
         type: String,
-        required: false,
       },
-      front_image: {
+      gst_in: {
         type: String,
-        required: false,
       },
-      back_image: {
+      pan_image: {
         type: String,
-        required: false,
+      },
+      gst_in_image: {
+        type: String,
       },
     },
     bank_account: {
-      type: {
+      name: {
         type: String,
-        enum: ["checking", "savings"],
-        required: false,
-      },
-      account_number: {
-        type: String,
-        required: false,
-      },
-      ifsc_code: {
-        type: String,
-        required: false,
-      },
-      account_holder_name: {
-        type: String,
-        required: false,
       },
       bank_name: {
         type: String,
-        required: false,
+      },
+      account_number: {
+        type: String,
+      },
+      ifsc_code: {
+        type: String,
+      },
+      account_image: {
+        type: String,
       },
     },
     completed: {
