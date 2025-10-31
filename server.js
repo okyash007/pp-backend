@@ -22,8 +22,8 @@ connectToMongoDB();
 app.use(helmet()); // Security headers
 app.use(cors()); // Enable CORS
 app.use(morgan('combined')); // Logging
-app.use(express.json()); // Parse JSON bodies
-app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+app.use(express.json({ limit: '10mb' })); // Parse JSON bodies (10MB limit for large payloads)
+app.use(express.urlencoded({ extended: true, limit: '10mb' })); // Parse URL-encoded bodies (10MB limit)
 
 // Health check route
 /**
