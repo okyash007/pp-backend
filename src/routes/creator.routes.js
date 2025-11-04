@@ -6,6 +6,7 @@ import {
   updateCreatorProfile,
   verifyCreator,
   getAllCreatorsController,
+  updateCreatorByIdController,
 } from "../controllers/creator.controllers.js";
 import { authenticateToken } from "../middleware/auth.js";
 import {
@@ -224,6 +225,11 @@ router.put(
   authenticateToken,
   validate(updateProfileSchema),
   updateCreatorProfile
+);
+
+router.put(
+  "/profile/:id",
+  updateCreatorByIdController
 );
 
 router.get("/verify/:id", verifyCreator);

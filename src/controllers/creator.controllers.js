@@ -431,3 +431,36 @@ export const getAllCreatorsController = catchAsync(async (req, res) => {
   );
   res.status(200).json(response);
 });
+
+export const updateCreatorByIdController = catchAsync(async (req, res) => {
+  const creatorId = req.params.id;
+  const updateData = req.body;
+  const updatedCreator = await Creator.findByIdAndUpdate(creatorId, updateData, {
+    new: true,
+    runValidators: true,
+  });
+  if (!updatedCreator) {
+    throw new ApiError(404, "Creator not found");
+  }
+  const creatorResponse = {
+    _id: updatedCreator._id,
+    creator_id: updatedCreator.creator_id,
+    username: updatedCreator.username,
+    firstName: updatedCreator.firstName,
+    lastName: updatedCreator.lastName,
+    email: updatedCreator.email,
+    phone: updatedCreator.phone,
+    socials: updatedCreator.socials,
+    approved: updatedCreator.approved,
+    verified: updatedCreator.verified,
+    role: updatedCreator.role,
+    image: updatedCreator.image,
+    banner_image: updatedCreator.banner_image,
+    onboarding: updatedCreator.onboarding,
+    razorpay_account_id: updatedCreator.razorpay_account_id,
+    createdAt: updatedCreator.createdAt,
+    updatedAt: updatedCreator.updatedAt,
+  };
+  const response = new ApiResponse(200, creatorResponse, "Creator updated successfully");
+  res.status(200).json(response);
+});
