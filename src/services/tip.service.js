@@ -1,6 +1,12 @@
 import { pool } from "../utils/postgress.js";
 
-export const getTips = async (creator_id, start_date, end_date, page = 1, limit = 100) => {
+export const getTips = async (
+  creator_id,
+  start_date,
+  end_date,
+  page = 1,
+  limit = 100
+) => {
   // Calculate offset for pagination
   const offset = (page - 1) * limit;
 
@@ -35,7 +41,9 @@ export const getTips = async (creator_id, start_date, end_date, page = 1, limit 
     params.push(end_date);
   }
 
-  query += ` ORDER BY t.created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+  query += ` ORDER BY t.created_at DESC LIMIT $${params.length + 1} OFFSET $${
+    params.length + 2
+  }`;
   params.push(limit, offset);
 
   const result = await pool.query(query, params);
@@ -63,4 +71,15 @@ export const getTipsCount = async (creator_id, start_date, end_date) => {
 
   const result = await pool.query(query, params);
   return parseInt(result.rows[0].total);
+};
+
+export const getUnsettledTips = async (creator_id) => {
+  let query = `
+    SELECT * FROM public.tips WHERE creator_id = $1 AND settled = false
+  `;
+
+  const params = [creator_id];
+
+  const result = await pool.query(query, params);
+  return result.rows;
 };

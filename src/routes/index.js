@@ -20,26 +20,4 @@ router.use("/tip-page", tipPageRoutes);
 router.use("/overlay", overlayRoutes);
 router.use("/onboarding", onboardingRoutes);
 
-router.get("/test", async (req, res) => {
-    try {
-        const response = await createRouteAccount({
-            email: "helloyashverma@gmail.com",
-            phone: "8006679475",
-            legal_business_name: "Yash Verma",
-            // settlement_info: {
-            //     account_type: "bank_account",
-            //     bank_account: {
-            //         account_number: "110222002734",
-            //         ifsc: "CNRB0018551",
-            //         account_holder_name: "Yash Verma",
-            //     },
-            // },
-        });
-        res.json(response);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-        console.error(error);
-    }
-});
-
 export default router;

@@ -188,6 +188,7 @@ export const getCreatorProfile = catchAsync(async (req, res) => {
     role: creator.role,
     image: creator.image,
     banner_image: creator.banner_image,
+    razorpay_account_id: creator.razorpay_account_id,
     onboarding: creator.onboarding,
     createdAt: creator.createdAt,
     updatedAt: creator.updatedAt,
@@ -247,6 +248,7 @@ export const updateCreatorProfile = catchAsync(async (req, res) => {
     role: creator.role,
     image: creator.image,
     banner_image: creator.banner_image,
+    razorpay_account_id: creator.razorpay_account_id,
     onboarding: creator.onboarding,
     createdAt: creator.createdAt,
     updatedAt: creator.updatedAt,
@@ -256,6 +258,47 @@ export const updateCreatorProfile = catchAsync(async (req, res) => {
     200,
     creatorResponse,
     "Profile updated successfully"
+  );
+  res.status(200).json(response);
+});
+
+export const updateCreatorByIDController = catchAsync(async (req, res) => {
+  const creatorId = req.params.id;
+  const updateData = req.body;
+  const updatedCreator = await Creator.findByIdAndUpdate(
+    creatorId,
+    updateData,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+  if (!updatedCreator) {
+    throw new ApiError(404, "Creator not found");
+  }
+  const creatorResponse = {
+    _id: updatedCreator._id,
+    creator_id: updatedCreator.creator_id,
+    username: updatedCreator.username,
+    firstName: updatedCreator.firstName,
+    lastName: updatedCreator.lastName,
+    email: updatedCreator.email,
+    phone: updatedCreator.phone,
+    socials: updatedCreator.socials,
+    approved: updatedCreator.approved,
+    verified: updatedCreator.verified,
+    role: updatedCreator.role,
+    image: updatedCreator.image,
+    banner_image: updatedCreator.banner_image,
+    razorpay_account_id: updatedCreator.razorpay_account_id,
+    onboarding: updatedCreator.onboarding,
+    createdAt: updatedCreator.createdAt,
+    updatedAt: updatedCreator.updatedAt,
+  };
+  const response = new ApiResponse(
+    200,
+    creatorResponse,
+    "Creator updated successfully"
   );
   res.status(200).json(response);
 });
