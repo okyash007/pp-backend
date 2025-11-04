@@ -100,6 +100,10 @@ API_BASE_URL=http://localhost:8000
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
+
+# Razorpay Configuration (for payment processing)
+RAZORPAY_KEY_ID=your_razorpay_key_id
+RAZORPAY_KEY_SECRET=your_razorpay_key_secret
 ```
 
 #### Required Environment Variables:
@@ -108,6 +112,8 @@ CLOUDINARY_API_SECRET=your_api_secret
 - `CLOUDINARY_CLOUD_NAME` - Your Cloudinary cloud name
 - `CLOUDINARY_API_KEY` - Your Cloudinary API key
 - `CLOUDINARY_API_SECRET` - Your Cloudinary API secret
+- `RAZORPAY_KEY_ID` - Your Razorpay API Key ID
+- `RAZORPAY_KEY_SECRET` - Your Razorpay API Key Secret
 
 ## Development
 
