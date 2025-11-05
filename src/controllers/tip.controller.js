@@ -5,6 +5,7 @@ import {
   getUnsettledTips,
   getTipsByCreatorId,
   getTipsByCreatorIdCount,
+  getAmountsByCreatorId,
 } from "../services/tip.service.js";
 import catchAsync from "../utils/catchAsync.js";
 import ApiError from "../utils/error.api.js";
@@ -185,4 +186,10 @@ export const getTipsByCreatorIdController = catchAsync(async (req, res) => {
   res.json(
     new ApiResponse(200, { tips, pagination }, "Tips retrieved successfully")
   );
+});
+
+export const getAmountsByCreatorIdController = catchAsync(async (req, res) => {
+  const { creator_id } = req.params;
+  const amounts = await getAmountsByCreatorId(creator_id);
+  res.json(new ApiResponse(200, amounts));
 });

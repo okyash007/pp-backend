@@ -114,3 +114,23 @@ export const getTipsByCreatorIdCount = async (creator_id) => {
   const result = await pool.query(query, params);
   return parseInt(result.rows[0].total);
 };
+
+export const getAmountsByCreatorId = async (creator_id) => {
+  const query = `
+    SELECT 
+      COALESCE(SUM(amount), 0) as total_collected,
+      COALESCE(SUM(CASE WHEN settled = true THEN amount * 0.95 ELSE 0 END), 0) as total_settled,
+      COALESCE(SUM(CASE WHEN settled = false THEN amount * 0.95 ELSE 0 END), 0) as total_unsettled
+    FROM public.tips
+    WHERE creator_id = $1
+  `;
+
+  const params = [creator_id];
+  const result = await pool.query(query, params);
+
+  return {
+    collected_amount: parseFloat(result.rows[0].total_collected) || 0,
+    settled_amount: parseFloat(result.rows[0].total_settled) || 0,
+    unsettled_amount: parseFloat(result.rows[0].total_unsettled) || 0,
+  };
+}
