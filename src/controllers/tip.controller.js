@@ -3,6 +3,8 @@ import {
   getTips,
   getTipsCount,
   getUnsettledTips,
+  getTipsByCreatorId,
+  getTipsByCreatorIdCount,
 } from "../services/tip.service.js";
 import catchAsync from "../utils/catchAsync.js";
 import ApiError from "../utils/error.api.js";
@@ -141,4 +143,46 @@ export const getUnsettledTipsController = catchAsync(async (req, res) => {
   );
 
   res.send(csv);
+});
+
+
+export const getTipsByCreatorIdController = catchAsync(async (req, res) => {
+  const { creator_id } = req.params;
+  const { page = 1, limit = 100 } = req.query;
+
+  // Validate pagination parameters
+  const pageNum = parseInt(page);
+  const limitNum = parseInt(limit);
+
+  if (pageNum < 1) {
+    throw new ApiError(400, "Page number must be greater than 0");
+  }
+
+  if (limitNum < 1 || limitNum > 100) {
+    throw new ApiError(400, "Limit must be between 1 and 100");
+  }
+
+  // Get tips and total count in parallel
+  const [tips, totalCount] = await Promise.all([
+    getTipsByCreatorId(creator_id, pageNum, limitNum),
+    getTipsByCreatorIdCount(creator_id),
+  ]);
+
+  // Calculate pagination metadata
+  const totalPages = Math.ceil(totalCount / limitNum);
+  const hasNextPage = pageNum < totalPages;
+  const hasPrevPage = pageNum > 1;
+
+  const pagination = {
+    currentPage: pageNum,
+    totalPages,
+    totalCount,
+    limit: limitNum,
+    hasNextPage,
+    hasPrevPage,
+  };
+
+  res.json(
+    new ApiResponse(200, { tips, pagination }, "Tips retrieved successfully")
+  );
 });

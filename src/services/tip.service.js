@@ -83,3 +83,34 @@ export const getUnsettledTips = async (creator_id) => {
   const result = await pool.query(query, params);
   return result.rows;
 };
+
+
+export const getTipsByCreatorId = async (creator_id, page = 1, limit = 100) => {
+  // Calculate offset for pagination
+  const offset = (page - 1) * limit;
+
+  let query = `
+    SELECT * FROM public.tips 
+    WHERE creator_id = $1
+    ORDER BY created_at DESC
+    LIMIT $2 OFFSET $3
+  `;
+
+  const params = [creator_id, limit, offset];
+
+  const result = await pool.query(query, params);
+  return result.rows;
+};
+
+export const getTipsByCreatorIdCount = async (creator_id) => {
+  let query = `
+    SELECT COUNT(*) as total
+    FROM public.tips
+    WHERE creator_id = $1
+  `;
+
+  const params = [creator_id];
+
+  const result = await pool.query(query, params);
+  return parseInt(result.rows[0].total);
+};
