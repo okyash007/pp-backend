@@ -104,6 +104,14 @@ CLOUDINARY_API_SECRET=your_api_secret
 # Razorpay Configuration (for payment processing)
 RAZORPAY_KEY_ID=your_razorpay_key_id
 RAZORPAY_KEY_SECRET=your_razorpay_key_secret
+
+# Email Configuration (for sending emails)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your_email@gmail.com
+SMTP_PASSWORD=your_app_password
+SMTP_FROM=your_email@gmail.com
 ```
 
 #### Required Environment Variables:
@@ -114,6 +122,8 @@ RAZORPAY_KEY_SECRET=your_razorpay_key_secret
 - `CLOUDINARY_API_SECRET` - Your Cloudinary API secret
 - `RAZORPAY_KEY_ID` - Your Razorpay API Key ID
 - `RAZORPAY_KEY_SECRET` - Your Razorpay API Key Secret
+- `SMTP_USER` - Email address for SMTP authentication
+- `SMTP_PASSWORD` - Password or app password for SMTP authentication
 
 ## Development
 
@@ -146,3 +156,32 @@ Response:
   "message": "Image uploaded successfully"
 }
 ```
+
+### Email Service Usage
+
+The email service allows you to send HTML emails. Import and use it in your controllers:
+
+```javascript
+import { sendEmail } from '../services/email.service.js';
+
+// Basic usage
+await sendEmail(
+  'recipient@example.com',
+  '<h1>Hello</h1><p>This is an HTML email.</p>'
+);
+
+// With options
+await sendEmail(
+  'recipient@example.com',
+  '<h1>Hello</h1><p>This is an HTML email.</p>',
+  {
+    subject: 'Welcome Email',
+    from: 'sender@example.com',
+    text: 'Hello\n\nThis is a plain text version.',
+    cc: ['cc@example.com'],
+    bcc: ['bcc@example.com']
+  }
+);
+```
+
+**Note for Gmail users:** You'll need to use an [App Password](https://support.google.com/accounts/answer/185833) instead of your regular password for `SMTP_PASSWORD`.

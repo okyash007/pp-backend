@@ -21,6 +21,7 @@ export const getTips = async (
       t.payment_gateway,
       t.payment_id,
       t.created_at,
+      t.settled,
       u.name as visitor_name,
       u.email as visitor_email,
       u.phone as visitor_phone
