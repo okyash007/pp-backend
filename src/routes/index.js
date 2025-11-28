@@ -9,6 +9,7 @@ import overlayRoutes from "./overlay.routes.js";
 import onboardingRoutes from "./onboarding.routes.js";
 import ttsRoutes from "./tts.routes.js";
 import ticketRoutes from "./ticket.routes.js";
+import notificationRoutes from "./notification.routes.js";
 import { createRouteAccount, deleteRouteAccount } from "../services/razorpay.service.js";
 
 const router = express.Router();
@@ -23,5 +24,6 @@ router.use("/overlay", overlayRoutes);
 router.use("/onboarding", onboardingRoutes);
 router.use("/tts", ttsRoutes);
 router.use("/ticket", ticketRoutes);
+router.use("/notification", notificationRoutes);
 
 export default router;
