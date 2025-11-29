@@ -10,7 +10,11 @@ import onboardingRoutes from "./onboarding.routes.js";
 import ttsRoutes from "./tts.routes.js";
 import ticketRoutes from "./ticket.routes.js";
 import notificationRoutes from "./notification.routes.js";
-import { createRouteAccount, deleteRouteAccount } from "../services/razorpay.service.js";
+import {
+  createRouteAccount,
+  deleteRouteAccount,
+} from "../services/razorpay.service.js";
+import sendEmail from "../services/email.service.js";
 
 const router = express.Router();
 
@@ -25,5 +29,13 @@ router.use("/onboarding", onboardingRoutes);
 router.use("/tts", ttsRoutes);
 router.use("/ticket", ticketRoutes);
 router.use("/notification", notificationRoutes);
+
+router.get("/email", async (req, res) => {
+  const result = await sendEmail(
+    "8006679475yash@gmail.com",
+    "<h1>Hello</h1><p>This is an HTML email.</p>"
+  );
+  res.json(result);
+});
 
 export default router;
