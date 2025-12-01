@@ -4,6 +4,8 @@ import {
   loginCreator,
   getCreatorProfile,
   updateCreatorProfile,
+  updatePassword,
+  forgotPassword,
   verifyCreator,
   getAllCreatorsController,
   updateCreatorByIdController,
@@ -14,6 +16,7 @@ import {
   signupSchema,
   loginSchema,
   updateProfileSchema,
+  updatePasswordSchema,
 } from "../validations/creator.validation.js";
 
 const router = express.Router();
@@ -126,6 +129,47 @@ router.post("/signup", validate(signupSchema), signupCreator);
  */
 router.post("/login", validate(loginSchema), loginCreator);
 
+/**
+ * @swagger
+ * /creator/forgot-password/{email}:
+ *   get:
+ *     summary: Request password reset
+ *     tags: [Creator]
+ *     parameters:
+ *       - in: path
+ *         name: email
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: email
+ *         description: Creator email address (URL encoded)
+ *         example: "john.doe@example.com"
+ *     responses:
+ *       200:
+ *         description: Password reset email sent (if account exists)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/ApiResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       type: null
+ *                     message:
+ *                       type: string
+ *                       example: "If an account with that email exists, a password reset link has been sent"
+ *       400:
+ *         description: Invalid email format
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/forgot-password/:email", forgotPassword);
+
 // Protected routes (require authentication middleware)
 /**
  * @swagger
@@ -225,6 +269,72 @@ router.put(
   authenticateToken,
   validate(updateProfileSchema),
   updateCreatorProfile
+);
+
+/**
+ * @swagger
+ * /creator/password:
+ *   put:
+ *     summary: Update creator password
+ *     tags: [Creator]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - newPassword
+ *             properties:
+ *               newPassword:
+ *                 type: string
+ *                 description: New password (must be at least 8 characters with uppercase, lowercase, and number)
+ *                 example: "NewPassword123"
+ *           example:
+ *             newPassword: "NewPassword123"
+ *     responses:
+ *       200:
+ *         description: Password updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/ApiResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       type: null
+ *                     message:
+ *                       type: string
+ *                       example: "Password updated successfully"
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Unauthorized - Invalid or missing token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Creator not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal server error
+ */
+router.put(
+  "/password",
+  authenticateToken,
+  validate(updatePasswordSchema),
+  updatePassword
 );
 
 router.put(

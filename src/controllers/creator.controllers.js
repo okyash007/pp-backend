@@ -10,12 +10,24 @@ import { ApiResponse } from "../utils/response.api.js";
 import ApiError from "../utils/error.api.js";
 import catchAsync from "../utils/catchAsync.js";
 import { createSubscription } from "../services/razorpay.service.js";
+import { sendEmail } from "../services/email.service.js";
 
 // Generate JWT token
 const generateToken = (creatorId) => {
   return jwt.sign({ creatorId }, process.env.JWT_SECRET || "fallback_secret", {
     expiresIn: "7d",
   });
+};
+
+// Generate password reset token
+const generatePasswordResetToken = (creatorId) => {
+  return jwt.sign(
+    { creatorId, type: "password_reset" },
+    process.env.JWT_SECRET || "fallback_secret",
+    {
+      expiresIn: "1h", // Token expires in 1 hour
+    }
+  );
 };
 
 // Signup Creator
@@ -491,4 +503,290 @@ export const updateCreatorByIdController = catchAsync(async (req, res) => {
   };
   const response = new ApiResponse(200, creatorResponse, "Creator updated successfully");
   res.status(200).json(response);
+});
+
+// Update Creator Password
+export const updatePassword = catchAsync(async (req, res) => {
+  const creatorId = req.creatorId; // Assuming this is set by auth middleware
+  const { newPassword } = req.body;
+
+  // Find creator
+  const creator = await Creator.findById(creatorId);
+  if (!creator) {
+    throw new ApiError(404, "Creator not found");
+  }
+
+  // Hash new password
+  const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+  // Update password
+  creator.password = hashedPassword;
+  await creator.save();
+
+  const response = new ApiResponse(
+    200,
+    null,
+    "Password updated successfully"
+  );
+  res.status(200).json(response);
+});
+
+// Forgot Password - Send reset email
+export const forgotPassword = catchAsync(async (req, res) => {
+  const email = decodeURIComponent(req.params.email);
+
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    throw new ApiError(400, "Invalid email format");
+  }
+
+  // Find creator by email
+  const creator = await Creator.findOne({ email });
+  
+  // For security, don't reveal if email exists or not
+  // Always return success message
+  if (!creator) {
+    // Still return success to prevent email enumeration
+    const response = new ApiResponse(
+      200,
+      null,
+      "If an account with that email exists, a password reset link has been sent"
+    );
+    return res.status(200).json(response);
+  }
+
+  // Generate password reset token
+  const resetToken = generatePasswordResetToken(creator._id);
+
+  // Create reset URL
+  const resetUrl = `https://dashboard.apextip.space/forgot-password?token=${resetToken}`;
+
+  // Create HTML email template with button matching dashboard theme
+  const emailHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+      <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+        body {
+          font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+          background-color: #AAD6B8;
+          padding: 20px;
+          line-height: 1.6;
+        }
+        .email-wrapper {
+          max-width: 600px;
+          margin: 0 auto;
+          background-color: #ffffff;
+        }
+        .header {
+          background: linear-gradient(135deg, #828BF8 0%, #828BF8 100%);
+          border: 5px solid #000000;
+          padding: 24px;
+          box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1);
+          margin-bottom: 24px;
+        }
+        .header-title {
+          font-size: 28px;
+          font-weight: 900;
+          color: #ffffff;
+          text-transform: uppercase;
+          letter-spacing: -0.02em;
+          text-shadow: 4px 4px 0px rgba(0, 0, 0, 0.3);
+          line-height: 1.2;
+        }
+        .header-title .accent {
+          color: #FEF18C;
+        }
+        .header-subtitle {
+          font-size: 11px;
+          color: rgba(255, 255, 255, 0.9);
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          margin-top: 8px;
+        }
+        .content {
+          padding: 30px;
+          background-color: #ffffff;
+        }
+        .greeting {
+          font-size: 18px;
+          font-weight: 800;
+          color: #000000;
+          margin-bottom: 16px;
+          text-transform: uppercase;
+          letter-spacing: -0.01em;
+        }
+        .message {
+          font-size: 16px;
+          color: #000000;
+          margin-bottom: 24px;
+          font-weight: 500;
+          line-height: 1.7;
+        }
+        .button-wrapper {
+          text-align: center;
+          margin: 32px 0;
+        }
+        .button {
+          display: inline-block;
+          padding: 16px 40px;
+          background-color: #000000;
+          color: #ffffff;
+          text-decoration: none;
+          border: 3px solid #000000;
+          font-weight: 800;
+          font-size: 16px;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+          transition: all 0.15s ease;
+          cursor: pointer;
+        }
+        .button:hover {
+          transform: translate(2px, 2px);
+          box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1);
+        }
+        .link-text {
+          margin-top: 20px;
+          font-size: 14px;
+          color: #000000;
+          font-weight: 600;
+          margin-bottom: 12px;
+        }
+        .link-url {
+          word-break: break-all;
+          font-size: 12px;
+          color: #828BF8;
+          font-weight: 600;
+          padding: 12px;
+          background-color: #f9f9f9;
+          border: 2px solid #000000;
+          font-family: monospace;
+        }
+        .warning {
+          margin-top: 32px;
+          padding: 20px;
+          background-color: #fff3cd;
+          border: 3px solid #000000;
+          box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+        }
+        .warning-title {
+          font-size: 14px;
+          font-weight: 800;
+          color: #000000;
+          text-transform: uppercase;
+          margin-bottom: 8px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .warning-text {
+          font-size: 14px;
+          color: #000000;
+          font-weight: 500;
+          line-height: 1.6;
+        }
+        .footer {
+          margin-top: 32px;
+          padding-top: 24px;
+          border-top: 2px solid #000000;
+          font-size: 12px;
+          color: #666666;
+          font-weight: 500;
+          text-align: center;
+        }
+        @media only screen and (max-width: 600px) {
+          .email-wrapper {
+            width: 100% !important;
+          }
+          .content {
+            padding: 20px !important;
+          }
+          .header {
+            padding: 20px !important;
+          }
+          .header-title {
+            font-size: 24px !important;
+          }
+          .button {
+            padding: 14px 32px;
+            font-size: 14px;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="email-wrapper">
+        <div class="header">
+          <div class="header-title">
+            POTATO<span class="accent">PAY</span>
+          </div>
+          <div class="header-subtitle">
+            Password Reset Request
+          </div>
+        </div>
+        
+        <div class="content">
+          <div class="greeting">
+            Hello ${creator.firstName || creator.username}!
+          </div>
+          
+          <div class="message">
+            We received a request to reset your password. Click the button below to reset your password:
+          </div>
+          
+          <div class="button-wrapper">
+            <a href="${resetUrl}" target="_blank" class="button">Reset Password</a>
+          </div>
+          
+          <div class="link-text">Or copy and paste this link into your browser:</div>
+          <div class="link-url">${resetUrl}</div>
+          
+          <div class="warning">
+            <div class="warning-title">
+              ⚠️ Important
+            </div>
+            <div class="warning-text">
+              This link will expire in 1 hour. If you didn't request this password reset, please ignore this email.
+            </div>
+          </div>
+          
+          <div class="footer">
+            <p>This is an automated message, please do not reply to this email.</p>
+            <p style="margin-top: 8px;">© Potato Pay - The Future of Digital Payments & Fun Fan Funding</p>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  // Send email
+  try {
+    await sendEmail(creator.email, emailHtml, {
+      subject: "Password Reset Request - Potato Pay",
+    });
+
+    const response = new ApiResponse(
+      200,
+      null,
+      "If an account with that email exists, a password reset link has been sent"
+    );
+    res.status(200).json(response);
+  } catch (error) {
+    console.error("Error sending password reset email:", error);
+    throw new ApiError(500, "Failed to send password reset email");
+  }
 });
