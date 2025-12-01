@@ -61,6 +61,14 @@ export const signupSchema = z.object({
     .regex(/^\+?[\d\s\-\(\)]+$/, "Please provide a valid phone number")
     .optional()
     .or(z.literal("")),
+  display_name: z
+    .string()
+    .max(100, "Display name must be less than 100 characters")
+    .optional(),
+  bio: z
+    .string()
+    .max(500, "Bio must be less than 500 characters")
+    .optional(),
   socials: z.array(socialSchema).optional(),
 });
 
@@ -100,6 +108,14 @@ export const updateProfileSchema = z.object({
     .regex(/^\+?[\d\s\-\(\)]+$/, "Please provide a valid phone number")
     .optional()
     .or(z.literal("")),
+  display_name: z
+    .string()
+    .max(100, "Display name must be less than 100 characters")
+    .optional(),
+  bio: z
+    .string()
+    .max(500, "Bio must be less than 500 characters")
+    .optional(),
   socials: z.array(socialSchema).optional(),
   image: z
     .object({

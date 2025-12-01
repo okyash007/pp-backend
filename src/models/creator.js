@@ -40,6 +40,16 @@ const creatorSchema = new mongoose.Schema(
     phone: {
       type: String,
     },
+    display_name: {
+      type: String,
+      maxlength: [100, "Display name must be less than 100 characters"],
+      trim: true,
+    },
+    bio: {
+      type: String,
+      maxlength: [500, "Bio must be less than 500 characters"],
+      trim: true,
+    },
     verificationCode: {
       type: String,
     },
