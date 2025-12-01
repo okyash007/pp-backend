@@ -61,6 +61,14 @@ const creatorSchema = new mongoose.Schema(
         },
       },
     ],
+    subscription_id: {
+      type: String,
+    },
+    subscription_status: {
+      type: String,
+      enum: ["free", "pro"],
+      default: "free",
+    },
     image: {
       src: {
         type: String,

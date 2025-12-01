@@ -9,6 +9,7 @@ import LinkTree from "../models/linkTree.js";
 import { ApiResponse } from "../utils/response.api.js";
 import ApiError from "../utils/error.api.js";
 import catchAsync from "../utils/catchAsync.js";
+import { createSubscription } from "../services/razorpay.service.js";
 
 // Generate JWT token
 const generateToken = (creatorId) => {
@@ -70,27 +71,50 @@ export const signupCreator = catchAsync(async (req, res) => {
   savedCreator.onboarding = savedOnboarding._id;
   await savedCreator.save();
 
+  // Create Razorpay subscription
+  try {
+    // Create subscription using the format from test route
+    const subscription = await createSubscription({
+      plan_id: process.env.RAZORPAY_PLAN_ID || "plan_RkSauBrurSpcGQ",
+      total_count: 12,
+      quantity: 1,
+      customer_notify: 1,
+    });
+
+    // Save subscription_id to creator
+    savedCreator.subscription_id = subscription.id;
+    await savedCreator.save();
+  } catch (error) {
+    // Log error but don't fail creator creation
+    console.error("Error creating Razorpay subscription for creator:", savedCreator._id, error);
+  }
+
   // Generate token
   const token = generateToken(savedCreator._id);
 
+  // Refresh creator to get updated subscription_id
+  const updatedCreator = await Creator.findById(savedCreator._id);
+
   // Remove sensitive data from response
   const creatorResponse = {
-    _id: savedCreator._id,
-    creator_id: savedCreator.creator_id,
-    username: savedCreator.username,
-    firstName: savedCreator.firstName,
-    lastName: savedCreator.lastName,
-    email: savedCreator.email,
-    phone: savedCreator.phone,
-    socials: savedCreator.socials,
-    approved: savedCreator.approved,
-    verified: savedCreator.verified,
-    role: savedCreator.role,
-    image: savedCreator.image,
-    banner_image: savedCreator.banner_image,
-    onboarding: savedCreator.onboarding,
-    createdAt: savedCreator.createdAt,
-    updatedAt: savedCreator.updatedAt,
+    _id: updatedCreator._id,
+    creator_id: updatedCreator.creator_id,
+    username: updatedCreator.username,
+    firstName: updatedCreator.firstName,
+    lastName: updatedCreator.lastName,
+    email: updatedCreator.email,
+    phone: updatedCreator.phone,
+    socials: updatedCreator.socials,
+    approved: updatedCreator.approved,
+    verified: updatedCreator.verified,
+    role: updatedCreator.role,
+    image: updatedCreator.image,
+    banner_image: updatedCreator.banner_image,
+    subscription_id: updatedCreator.subscription_id,
+    subscription_status: updatedCreator.subscription_status,
+    onboarding: updatedCreator.onboarding,
+    createdAt: updatedCreator.createdAt,
+    updatedAt: updatedCreator.updatedAt,
   };
 
   const response = new ApiResponse(
@@ -148,6 +172,8 @@ export const loginCreator = catchAsync(async (req, res) => {
     role: creator.role,
     image: creator.image,
     banner_image: creator.banner_image,
+    subscription_id: creator.subscription_id,
+    subscription_status: creator.subscription_status,
     onboarding: creator.onboarding,
     createdAt: creator.createdAt,
     updatedAt: creator.updatedAt,
@@ -189,6 +215,8 @@ export const getCreatorProfile = catchAsync(async (req, res) => {
     image: creator.image,
     banner_image: creator.banner_image,
     razorpay_account_id: creator.razorpay_account_id,
+    subscription_id: creator.subscription_id,
+    subscription_status: creator.subscription_status,
     onboarding: creator.onboarding,
     createdAt: creator.createdAt,
     updatedAt: creator.updatedAt,

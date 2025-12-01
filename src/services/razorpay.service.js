@@ -238,8 +238,11 @@ export const createRouteAccount = async (accountData) => {
 
     // Handle common Razorpay authorization issues explicitly
     if (
-      (error?.statusCode === 400 || error?.statusCode === 401 || error?.statusCode === 403) &&
-      (error?.error?.description === "Access Denied" || error?.message === "Access Denied")
+      (error?.statusCode === 400 ||
+        error?.statusCode === 401 ||
+        error?.statusCode === 403) &&
+      (error?.error?.description === "Access Denied" ||
+        error?.message === "Access Denied")
     ) {
       throw new Error(
         "Access Denied from Razorpay. Ensure Route (Partner) product is enabled for your account and that you're using a Route-capable API key in the correct mode (test/live)."
@@ -248,7 +251,9 @@ export const createRouteAccount = async (accountData) => {
 
     // Fallback
     throw new Error(
-      error?.error?.description || error?.message || "Failed to create Razorpay route account"
+      error?.error?.description ||
+        error?.message ||
+        "Failed to create Razorpay route account"
     );
   }
 };
@@ -375,6 +380,141 @@ export const deleteRouteAccount = async (accountId) => {
         error.message ||
         "Failed to delete Razorpay route account"
     );
+  }
+};
+
+// Plan ID validation schema
+const planIdSchema = z
+  .string()
+  .min(1, "Plan ID is required")
+  .regex(/^plan_[a-zA-Z0-9]+$/, "Invalid Razorpay plan ID format");
+
+// Create customer schema
+const createCustomerSchema = z.object({
+  name: z.string().min(1, "Customer name is required").optional(),
+  email: z.string().email("Please provide a valid email address").optional(),
+  contact: z
+    .string()
+    .regex(/^\+?[\d\s\-\(\)]+$/, "Please provide a valid phone number")
+    .optional(),
+  notes: z.record(z.any()).optional(),
+});
+
+// Customer schema for subscription
+const customerSchema = z
+  .object({
+    name: z.string().min(1, "Customer name is required").optional(),
+    email: z.string().email("Please provide a valid email address").optional(),
+    contact: z
+      .string()
+      .regex(/^\+?[\d\s\-\(\)]+$/, "Please provide a valid phone number")
+      .optional(),
+    notes: z.record(z.any()).optional(),
+  })
+  .optional();
+
+// Addon item schema
+const addonItemSchema = z.object({
+  name: z.string().min(1, "Addon item name is required"),
+  amount: z.number().int().positive("Addon amount must be positive"),
+  currency: z.string().min(1, "Currency is required"),
+  description: z.string().optional(),
+});
+
+// Addon schema
+const addonSchema = z.object({
+  item: addonItemSchema,
+});
+
+// Create subscription schema
+const createSubscriptionSchema = z
+  .object({
+    plan_id: planIdSchema,
+    customer_id: z
+      .string()
+      .regex(/^cust_[a-zA-Z0-9]+$/, "Invalid Razorpay customer ID format")
+      .optional(),
+    total_count: z.number().int().positive().optional(),
+    quantity: z.number().int().positive().optional(),
+    customer_notify: z
+      .union([z.boolean(), z.number().int().min(0).max(1)])
+      .optional(),
+    start_at: z
+      .union([z.number().int().positive(), z.date()])
+      .optional()
+      .transform((val) =>
+        val instanceof Date ? Math.floor(val.getTime() / 1000) : val
+      ),
+    expire_by: z
+      .union([z.number().int().positive(), z.date()])
+      .optional()
+      .transform((val) =>
+        val instanceof Date ? Math.floor(val.getTime() / 1000) : val
+      ),
+    addons: z.array(addonSchema).optional(),
+    offer_id: z.string().optional(),
+    notes: z.record(z.any()).optional(),
+  })
+  .refine(
+    (data) => data.total_count !== undefined || data.expire_by !== undefined,
+    {
+      message:
+        "Either total_count or expire_by must be provided. total_count is required when expire_by is not present.",
+      path: ["total_count"],
+    }
+  );
+
+/**
+ * Create a Razorpay Customer
+ * @param {Object} customerData - Customer creation data
+ * @param {String} customerData.name - Customer name
+ * @param {String} customerData.email - Customer email
+ * @param {String} customerData.contact - Customer phone number
+ * @param {Object} customerData.notes - Additional notes
+ * @returns {Promise<Object>} Created customer details
+ */
+export const createCustomer = async (customerData) => {
+  try {
+    // Validate input data using Zod
+    const validatedData = createCustomerSchema.parse(customerData);
+
+    const razorpay = getRazorpayInstance();
+    const customer = await razorpay.customers.create(validatedData);
+
+    return {
+      success: true,
+      customer_id: customer.id,
+      customer: customer,
+    };
+  } catch (error) {
+    console.error("Error creating Razorpay customer:", error);
+    // Handle Zod validation errors
+    if (error instanceof z.ZodError) {
+      const errorMessages = error.errors.map((err) => ({
+        field: err.path.join("."),
+        message: err.message,
+      }));
+      throw new Error(
+        `Validation failed: ${errorMessages.map((e) => e.message).join(", ")}`
+      );
+    }
+    throw new Error(
+      error?.error?.description ||
+        error?.message ||
+        "Failed to create Razorpay customer"
+    );
+  }
+};
+
+export const createSubscription = async (subscriptionData) => {
+  try {
+    const razorpay = getRazorpayInstance();
+    const subscription = await razorpay.subscriptions.create(subscriptionData);
+
+    return subscription;
+  } catch (error) {
+    console.error("Error creating Razorpay subscription:", error);
+    throw new Error(error.message);
   }
 };
 

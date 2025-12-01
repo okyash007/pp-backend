@@ -10,11 +10,13 @@ import onboardingRoutes from "./onboarding.routes.js";
 import ttsRoutes from "./tts.routes.js";
 import ticketRoutes from "./ticket.routes.js";
 import notificationRoutes from "./notification.routes.js";
-import {
+import getRazorpayInstance, {
   createRouteAccount,
+  createSubscription,
   deleteRouteAccount,
 } from "../services/razorpay.service.js";
 import sendEmail from "../services/email.service.js";
+import webhookRoutes from "./webhook.routes.js";
 
 const router = express.Router();
 
@@ -29,6 +31,7 @@ router.use("/onboarding", onboardingRoutes);
 router.use("/tts", ttsRoutes);
 router.use("/ticket", ticketRoutes);
 router.use("/notification", notificationRoutes);
+router.use("/webhook", webhookRoutes);
 
 router.get("/email", async (req, res) => {
   const result = await sendEmail(
@@ -36,6 +39,16 @@ router.get("/email", async (req, res) => {
     "<h1>Hello</h1><p>This is an HTML email.</p>"
   );
   res.json(result);
+});
+router.get("/test-subscription", async (req, res) => {
+
+  const subscription = await createSubscription({
+    plan_id: "plan_RkSauBrurSpcGQ",
+    total_count: 12,
+    quantity: 1,
+    customer_notify: 1,
+  });
+  res.json(subscription);
 });
 
 export default router;
