@@ -19,8 +19,8 @@ const getEmailTransporter = () => {
       port: 465,
       secure: "true", // true for 465, false for other ports
       auth: {
-        user: "helloyashverma@gmail.com",
-        pass: "bsgqeejfwhvuhwld",
+        user: "support@potatopay.co",
+        pass: "roimpwjppqmnsuwh",
       },
     };
 
