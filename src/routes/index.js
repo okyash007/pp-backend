@@ -43,7 +43,7 @@ router.get("/email", async (req, res) => {
 router.get("/test-subscription", async (req, res) => {
 
   const subscription = await createSubscription({
-    plan_id: "plan_RkSauBrurSpcGQ",
+    plan_id: process.env.RAZORPAY_PLAN_ID,
     total_count: 12,
     quantity: 1,
     customer_notify: 1,
