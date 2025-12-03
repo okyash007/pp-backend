@@ -559,9 +559,9 @@ export const forgotPassword = catchAsync(async (req, res) => {
   if (!creator) {
     // Still return success to prevent email enumeration
     const response = new ApiResponse(
-      200,
+      400,
       null,
-      "If an account with that email exists, a password reset link has been sent"
+      "Creator not found"
     );
     return res.status(200).json(response);
   }
@@ -792,7 +792,7 @@ export const forgotPassword = catchAsync(async (req, res) => {
     const response = new ApiResponse(
       200,
       null,
-      "If an account with that email exists, a password reset link has been sent"
+      "A password reset link has been sent"
     );
     res.status(200).json(response);
   } catch (error) {
