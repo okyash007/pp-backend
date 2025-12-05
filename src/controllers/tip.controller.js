@@ -81,8 +81,8 @@ const convertTipsToCsv = (tips, razorpayAccountId) => {
 
   // Create CSV rows
   const rows = tips.map((tip) => {
-    // Convert amount to paise (multiply by 100 for INR) and deduct 5%
-    const amountInPaise = (tip.amount/100) * 0.95;
+    // Amount is already in paisa, deduct 5% commission
+    const amountInPaise = tip.amount * 0.95;
 
     // Create transfer_notes JSON object
     const transferNotes = {
@@ -108,10 +108,10 @@ const convertTipsToCsv = (tips, razorpayAccountId) => {
     ];
   });
 
-  // Combine header and rows
+  // Combine header and rows (using comma as delimiter)
   const csvLines = [
-    headers.join("\t"),
-    ...rows.map((row) => row.join("\t")),
+    headers.join(","),
+    ...rows.map((row) => row.join(",")),
   ];
 
   return csvLines.join("\n");
@@ -136,12 +136,23 @@ export const getUnsettledTipsController = catchAsync(async (req, res) => {
   // Convert tips to CSV
   const csv = convertTipsToCsv(tips, razorpayAccountId);
 
-  // Set headers for CSV download
+  // Check if this is for Google Sheets import (no download header)
+  const isForImport = req.query.import === "true";
+
+  // Set headers for CSV
   res.setHeader("Content-Type", "text/csv");
-  res.setHeader(
-    "Content-Disposition",
-    `attachment; filename="unsettled_tips_${creator_id}_${Date.now()}.csv"`
-  );
+  
+  if (isForImport) {
+    // For Google Sheets import, allow CORS and don't force download
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET");
+  } else {
+    // For download, set download header
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="unsettled_tips_${creator_id}_${Date.now()}.csv"`
+    );
+  }
 
   res.send(csv);
 });
