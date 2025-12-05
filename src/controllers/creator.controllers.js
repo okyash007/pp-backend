@@ -508,6 +508,8 @@ export const updateCreatorByIdController = catchAsync(async (req, res) => {
     banner_image: updatedCreator.banner_image,
     onboarding: updatedCreator.onboarding,
     razorpay_account_id: updatedCreator.razorpay_account_id,
+    subscription_id: updatedCreator.subscription_id,
+    subscription_status: updatedCreator.subscription_status,
     createdAt: updatedCreator.createdAt,
     updatedAt: updatedCreator.updatedAt,
   };
