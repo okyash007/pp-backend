@@ -406,6 +406,125 @@ export const verifyCreator = catchAsync(async (req, res) => {
     // Commit the transaction
     await session.commitTransaction();
 
+    // Send approval email to creator
+    try {
+      const creatorName = creator.firstName || creator.username || "Creator";
+      const dashboardUrl = process.env.DASHBOARD_URL || "https://dashboard.potatopay.co";
+      
+      const emailHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Account Approved</title>
+          <link rel="preconnect" href="https://fonts.googleapis.com">
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+          <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+        </head>
+        <body style="margin: 0; padding: 0; font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; background: linear-gradient(to bottom right, #FEF18C20, #828BF815);">
+          <table role="presentation" style="width: 100%; border-collapse: collapse; background: linear-gradient(to bottom right, #FEF18C20, #828BF815);">
+            <tr>
+              <td style="padding: 40px 20px; text-align: center;">
+                <!-- Main Card Container -->
+                <table role="presentation" style="width: 100%; max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 4px solid #000000; border-radius: 0;">
+                  <!-- Banner Card Header -->
+                  <tr>
+                    <td style="padding: 0; background-color: #828BF8; border-bottom: 4px solid #000000;">
+                      <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                          <td style="padding: 24px 30px;">
+                            <div style="text-align: left;">
+                              <h1 style="margin: 0; padding: 0; font-family: 'Space Grotesk', sans-serif; font-size: 32px; font-weight: 900; letter-spacing: -0.02em; line-height: 1.2;">
+                                <span style="color: #ffffff;">POTATO</span><span style="color: #FEF18C;">PAY</span>
+                              </h1>
+                              <p style="margin: 8px 0 0 0; padding: 0; font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 700; color: #ffffff; text-transform: uppercase; letter-spacing: 0.1em;">
+                                ACCOUNT APPROVED
+                              </p>
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  
+                  <!-- Content Section -->
+                  <tr>
+                    <td style="padding: 40px 30px; background-color: #ffffff;">
+                      <div style="text-align: left;">
+                        <p style="margin: 0 0 20px 0; color: #000000; font-size: 18px; font-weight: 700; line-height: 1.6;">
+                          Hello ${creatorName}! 🎉
+                        </p>
+                        <p style="margin: 0 0 20px 0; color: #333333; font-size: 16px; font-weight: 500; line-height: 1.6;">
+                          Great news! Your account has been approved by our team. You can now access the dashboard and start using all the features.
+                        </p>
+                        <p style="margin: 0 0 30px 0; color: #333333; font-size: 16px; font-weight: 500; line-height: 1.6;">
+                          Your documents have been verified and you're all set to start collecting tips from your fans!
+                        </p>
+                        
+                        <!-- CTA Button Card -->
+                        <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 0 0 30px 0;">
+                          <tr>
+                            <td style="text-align: center;">
+                              <a href="${dashboardUrl}/dashboard" style="display: inline-block; padding: 16px 32px; background-color: #AAD6B8; color: #000000; text-decoration: none; font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; border: 4px solid #000000; box-shadow: 6px 6px 0px 0px rgba(0,0,0,1); transition: all 0.15s ease;">
+                                Access Dashboard
+                              </a>
+                            </td>
+                          </tr>
+                        </table>
+                        
+                        <div style="background-color: #FEF18C20; border: 2px solid #000000; padding: 20px; margin: 30px 0;">
+                          <p style="margin: 0 0 10px 0; color: #000000; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em;">
+                            What's Next?
+                          </p>
+                          <ul style="margin: 10px 0 0 0; padding-left: 20px; color: #333333; font-size: 14px; font-weight: 500; line-height: 1.8;">
+                            <li>Customize your profile and settings</li>
+                            <li>Set up your tip page and overlay</li>
+                            <li>Start collecting tips from your fans</li>
+                          </ul>
+                        </div>
+                        
+                        <p style="margin: 30px 0 0 0; color: #666666; font-size: 14px; font-weight: 500; line-height: 1.6;">
+                          If you have any questions, feel free to reach out to our support team.
+                        </p>
+                        <p style="margin: 20px 0 0 0; color: #000000; font-size: 14px; font-weight: 700; line-height: 1.6;">
+                          Best regards,<br>
+                          <span style="color: #828BF8; font-weight: 900;">The PotatoPay Team</span>
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                  
+                  <!-- Footer -->
+                  <tr>
+                    <td style="padding: 20px 30px; background-color: #FEF18C20; border-top: 4px solid #000000; text-align: center;">
+                      <p style="margin: 0; color: #666666; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">
+                        This is an automated email. Please do not reply to this message.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+      `;
+
+      await sendEmail(
+        creator.email,
+        emailHtml,
+        {
+          subject: "🎉 Your Account Has Been Approved!",
+          from: process.env.SMTP_USER || "support@potatopay.co",
+        }
+      );
+      console.log(`Approval email sent successfully to ${creator.email}`);
+    } catch (emailError) {
+      // Log email error but don't fail the approval process
+      console.error("Failed to send approval email:", emailError);
+    }
+
     // Prepare response
     const creatorResponse = {
       _id: creator._id,
