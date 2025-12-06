@@ -84,25 +84,14 @@ const convertTipsToCsv = (tips, razorpayAccountId) => {
     // Amount is already in paisa, deduct 5% commission
     const amountInPaise = tip.amount * 0.95;
 
-    // Create transfer_notes JSON object
-    const transferNotes = {
-      tip_id: tip.id,
-      visitor_id: tip.visitor_id,
-      message: tip.message || "",
-      created_at: tip.created_at,
-    };
-
-    // Get keys from transfer_notes for linked_account_notes
-    const linkedAccountNotes = Object.keys(transferNotes);
-
     // Convert to CSV row
     return [
       escapeCsvValue(tip.payment_id),
       escapeCsvValue(razorpayAccountId),
       escapeCsvValue(amountInPaise),
       escapeCsvValue(tip.currency),
-      escapeCsvValue(JSON.stringify(transferNotes)),
-      escapeCsvValue(JSON.stringify(linkedAccountNotes)),
+      escapeCsvValue(""),
+      escapeCsvValue(""),
       escapeCsvValue("0"),
       escapeCsvValue(""),
     ];
