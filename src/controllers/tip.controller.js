@@ -66,7 +66,7 @@ const escapeCsvValue = (value) => {
 };
 
 // Helper function to convert tips to CSV
-const convertTipsToCsv = (tips, razorpayAccountId) => {
+const convertTipsToCsv = (tips, razorpayAccountId, subscriptionStatus) => {
   // CSV header
   const headers = [
     "payment_id",
@@ -81,8 +81,10 @@ const convertTipsToCsv = (tips, razorpayAccountId) => {
 
   // Create CSV rows
   const rows = tips.map((tip) => {
-    // Amount is already in paisa, deduct 5% commission
-    const amountInPaise = tip.amount * 0.95;
+    // Amount is already in paisa, deduct commission based on subscription status
+    // Pro: 2% commission (multiply by 0.98), Free: 12% commission (multiply by 0.88)
+    const multiplier = subscriptionStatus === "pro" ? 0.98 : 0.88;
+    const amountInPaise = tip.amount * multiplier;
 
     // Convert to CSV row
     return [
@@ -123,7 +125,7 @@ export const getUnsettledTipsController = catchAsync(async (req, res) => {
   }
 
   // Convert tips to CSV
-  const csv = convertTipsToCsv(tips, razorpayAccountId);
+  const csv = convertTipsToCsv(tips, razorpayAccountId, creator.subscription_status);
 
   // Check if this is for Google Sheets import (no download header)
   const isForImport = req.query.import === "true";
