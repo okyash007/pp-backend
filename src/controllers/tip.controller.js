@@ -83,7 +83,7 @@ const convertTipsToCsv = (tips, razorpayAccountId, subscriptionStatus) => {
   const rows = tips.map((tip) => {
     // Amount is already in paisa, deduct commission based on subscription status
     // Pro: 2% commission (multiply by 0.98), Free: 12% commission (multiply by 0.88)
-    const multiplier = subscriptionStatus === "pro" ? 0.98 : 0.88;
+    const multiplier = subscriptionStatus === "pro" ? 0.975 : 0.88;
     const amountInPaise = tip.amount * multiplier;
 
     // Convert to CSV row

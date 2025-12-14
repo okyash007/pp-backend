@@ -1,4 +1,5 @@
 import { pool } from "../utils/postgress.js";
+import Creator from "../models/creator.js";
 
 export const getTips = async (
   creator_id,
@@ -117,16 +118,23 @@ export const getTipsByCreatorIdCount = async (creator_id) => {
 };
 
 export const getAmountsByCreatorId = async (creator_id) => {
+  // Fetch creator to get subscription_status
+  const creator = await Creator.findOne({ creator_id });
+  
+  // Determine multiplier based on subscription status
+  // Pro: 0.975 (97.5%), Free: 0.88 (88%)
+  const multiplier = creator?.subscription_status === "pro" ? 0.975 : 0.88;
+
   const query = `
     SELECT 
       COALESCE(SUM(amount), 0) as total_collected,
-      COALESCE(SUM(CASE WHEN settled = true THEN amount * 0.95 ELSE 0 END), 0) as total_settled,
-      COALESCE(SUM(CASE WHEN settled = false THEN amount * 0.95 ELSE 0 END), 0) as total_unsettled
+      COALESCE(SUM(CASE WHEN settled = true THEN amount * $2 ELSE 0 END), 0) as total_settled,
+      COALESCE(SUM(CASE WHEN settled = false THEN amount * $2 ELSE 0 END), 0) as total_unsettled
     FROM public.tips
     WHERE creator_id = $1
   `;
 
-  const params = [creator_id];
+  const params = [creator_id, multiplier];
   const result = await pool.query(query, params);
 
   return {
