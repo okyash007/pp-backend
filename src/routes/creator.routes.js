@@ -9,6 +9,7 @@ import {
   verifyCreator,
   getAllCreatorsController,
   updateCreatorByIdController,
+  deleteCreator,
 } from "../controllers/creator.controllers.js";
 import { authenticateToken } from "../middleware/auth.js";
 import {
@@ -343,6 +344,11 @@ router.put(
 );
 
 router.get("/verify/:id", verifyCreator);
+
+router.delete(
+  "/:id",
+  deleteCreator
+);
 
 router.get("/all", getAllCreatorsController);
 

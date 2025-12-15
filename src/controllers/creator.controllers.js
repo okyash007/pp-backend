@@ -6,11 +6,14 @@ import Onboarding from "../models/onboarding.js";
 import Overlay from "../models/overlay.js";
 import TipPage from "../models/tip-page.js";
 import LinkTree from "../models/linkTree.js";
+import Ticket from "../models/ticket.js";
+import Notification from "../models/notification.js";
 import { ApiResponse } from "../utils/response.api.js";
 import ApiError from "../utils/error.api.js";
 import catchAsync from "../utils/catchAsync.js";
 import { createSubscription } from "../services/razorpay.service.js";
 import { sendEmail } from "../services/email.service.js";
+import { pool } from "../utils/postgress.js";
 
 // Generate JWT token
 const generateToken = (creatorId) => {
@@ -629,11 +632,84 @@ export const updateCreatorByIdController = catchAsync(async (req, res) => {
     razorpay_account_id: updatedCreator.razorpay_account_id,
     subscription_id: updatedCreator.subscription_id,
     subscription_status: updatedCreator.subscription_status,
+    isActive: updatedCreator.isActive,
     createdAt: updatedCreator.createdAt,
     updatedAt: updatedCreator.updatedAt,
   };
   const response = new ApiResponse(200, creatorResponse, "Creator updated successfully");
   res.status(200).json(response);
+});
+
+// Delete Creator and All Associated Data
+export const deleteCreator = catchAsync(async (req, res) => {
+  const creatorId = req.params.id;
+  
+  const creator = await Creator.findById(creatorId);
+  if (!creator) {
+    throw new ApiError(404, "Creator not found");
+  }
+
+  const creator_id = creator.creator_id; // Store creator_id for PostgreSQL deletion
+
+  // Start a MongoDB session for transaction
+  const session = await mongoose.startSession();
+
+  try {
+    await session.startTransaction();
+
+    // Delete all related MongoDB documents
+    // 1. Delete Onboarding
+    if (creator.onboarding) {
+      await Onboarding.findByIdAndDelete(creator.onboarding).session(session);
+    }
+
+    // 2. Delete Overlay
+    await Overlay.deleteMany({ creator: creatorId }).session(session);
+
+    // 3. Delete TipPage
+    await TipPage.deleteMany({ creator: creatorId }).session(session);
+
+    // 4. Delete LinkTree
+    await LinkTree.deleteMany({ creator: creatorId }).session(session);
+
+    // 5. Delete Tickets
+    await Ticket.deleteMany({ creator: creatorId }).session(session);
+
+    // 6. Delete Notifications (both where creator is the target and where sentBy is the creator)
+    await Notification.deleteMany({ 
+      $or: [
+        { creator: creatorId },
+        { sentBy: creatorId }
+      ]
+    }).session(session);
+
+    // 7. Delete Creator
+    await Creator.findByIdAndDelete(creatorId).session(session);
+
+    // Commit MongoDB transaction
+    await session.commitTransaction();
+
+    // Delete PostgreSQL data (tips)
+    try {
+      await pool.query('DELETE FROM public.tips WHERE creator_id = $1', [creator_id]);
+    } catch (pgError) {
+      console.error('Error deleting tips from PostgreSQL:', pgError);
+      // Continue even if PostgreSQL deletion fails
+    }
+
+    const response = new ApiResponse(
+      200,
+      { deleted: true, creator_id },
+      "Creator and all associated data deleted successfully"
+    );
+    res.status(200).json(response);
+  } catch (error) {
+    await session.abortTransaction();
+    console.error('Error deleting creator:', error);
+    throw new ApiError(500, `Failed to delete creator: ${error.message}`);
+  } finally {
+    await session.endSession();
+  }
 });
 
 // Update Creator Password
