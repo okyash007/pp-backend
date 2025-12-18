@@ -391,7 +391,6 @@ export const verifyCreator = catchAsync(async (req, res) => {
     // Create overlay for the creator
     const overlay = new Overlay({
       creator: creatorId,
-      blocks: [], // Empty blocks array initially
     });
     await overlay.save({ session });
 
@@ -405,7 +404,6 @@ export const verifyCreator = catchAsync(async (req, res) => {
     // Create link-tree for the creator
     const linkTree = new LinkTree({
       creator: creatorId,
-      blocks: [], // Empty blocks array initially
     });
     await linkTree.save({ session });
 
