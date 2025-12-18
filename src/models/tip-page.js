@@ -12,7 +12,7 @@ const tipPageSchema = new mongoose.Schema(
         {
           type: "creator_card",
           className: "flex flex-col items-center gap-4 overflow-y-auto p-6",
-          template:`
+          template: `
           <div class="border-2 border-black rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] overflow-hidden w-full max-w-sm bg-white transform hover:scale-[1.01] transition-all duration-200" style="background: linear-gradient(135deg, #FEF18C40 0%, #FEC4FF40 50%, #828BF840 100%);">
             <!-- Banner Image -->
             <div class="relative w-full h-28 border-b-2 border-black">
@@ -43,15 +43,17 @@ const tipPageSchema = new mongoose.Schema(
               <p class="text-xs font-semibold text-black/60 mt-1">Your Creator Space</p>
             </div>
           </div>
-          `},
+          `,
+        },
         {
           type: "tips",
           className: "flex gap-4 overflow-y-auto px-4 pb-4",
           tip_btn: {
             className:
               "w-full bg-[#FF8181] hover:bg-[#FF8181]/90 justify-start gap-3 h-auto border-[3px] border-black rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:translate-x-1 hover:translate-y-1 active:translate-x-1 active:translate-y-1 active:shadow-none",
-            template:
-              "<div class='text-lg font-bold'>{% assign formatted_amount = amount | divided_by: 100.0 | round: 2 %}{% if currency == 'INR' %}₹{{ formatted_amount }}{% elsif currency == 'USD' %}${{ formatted_amount }}{% elsif currency == 'EUR' %}€{{ formatted_amount }}{% elsif currency == 'GBP' %}£{{ formatted_amount }}{% elsif currency == 'JPY' %}¥{{ formatted_amount }}{% else %}{{ currency }} {{ formatted_amount }}{% endif %}</div>",
+            template: `
+              <div class='text-lg font-bold'>{% assign formatted_amount = amount | divided_by: 100.0 | round: 2 %}{% if currency == 'INR' %}₹{{ formatted_amount }}{% elsif currency == 'USD' %}/$/{{ formatted_amount }}{% elsif currency == 'EUR' %}€{{ formatted_amount }}{% elsif currency == 'GBP' %}£{{ formatted_amount }}{% elsif currency == 'JPY' %}¥{{ formatted_amount }}{% else %}{{ currency }} {{ formatted_amount }}{% endif %}</div>
+            `,
             style: {
               backgroundColor: "#FF8181",
               color: "#000000",
@@ -65,7 +67,7 @@ const tipPageSchema = new mongoose.Schema(
               secondary_color: "#AAD6B8",
               text_color: "#000000",
             },
-            template:`
+            template: `
             <div class="relative inline-block w-[400px]">
               <div class="relative border-[6px] border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] overflow-hidden backdrop-blur-sm" style="background-color: {{ data.primary_color | default: '#FEF18C' }}; {% if data.background_image %}background-image: url('{{ data.background_image }}'); background-size: cover; background-position: center; background-repeat: no-repeat;{% endif %}">
                 <div class="absolute inset-0 opacity-25" style="background-image: radial-gradient(circle, rgba(0, 0, 0, 0.3) 1.5px, transparent 1.5px); background-size: 10px 10px;"></div>
@@ -107,7 +109,8 @@ const tipPageSchema = new mongoose.Schema(
                 </div>
               </div>
             </div>
-            `},
+            `,
+          },
         },
         {
           type: "user_form",
@@ -123,7 +126,7 @@ const tipPageSchema = new mongoose.Schema(
           button: {
             className:
               "w-full h-12 bg-[#FEF18C] hover:bg-[#FEF18C]/90 text-2xl font-black text-black border-[3px] border-black rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:translate-x-1 hover:translate-y-1 active:translate-x-1 active:translate-y-1 active:shadow-none",
-            text: "Pay Now",
+            text: "let's gooooooooo",
             style: {
               backgroundColor: "#fff582",
               color: "#000000",
